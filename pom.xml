@@ -4,24 +4,25 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>com.md_5</groupId>
-    <artifactId>jumpwarps</artifactId>
+    <artifactId>janus</artifactId>
     <version>dev-SNAPSHOT</version>
     <packaging>jar</packaging>
 
-    <name>JumpWarps</name>
-    <description>Bukkit plugin to kick users with a redirect packet upon entering a nether portal framed by a specific sign</description>
-    <url>https://github.com/Shadowraze/JumpWarps</url>
+    <name>Janus</name>
+    <description>The plugin portion of the Shadowraze server teleport suite.</description>
+    <url>https://github.com/Shadowraze/Janus</url>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <build.number>Unknown</build.number>
+        <main.class>com.md_5.janus.Main</main.class>
     </properties>
 
     <dependencies>
         <dependency>
             <groupId>org.bukkit</groupId>
             <artifactId>bukkit</artifactId>
-            <version>1.2.5-R1.1</version>
+            <version>1.2.5-R2.1-SNAPSHOT</version>
         </dependency>
     </dependencies>
 
@@ -48,6 +49,16 @@
                 <configuration>
                     <source>1.5</source>
                     <target>1.5</target>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <version>2.4</version>
+                <configuration>
+                    <archive>
+                        <addMavenDescriptor>false</addMavenDescriptor>
+                    </archive>
                 </configuration>
             </plugin>
         </plugins>

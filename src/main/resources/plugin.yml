@@ -4,4 +4,4 @@ description: ${project.description}
 author: md_5
 website: ${project.url}
 
-main: com.md_5.jumpwarps.Warper
+main: ${main.class}

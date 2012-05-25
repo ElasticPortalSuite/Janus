@@ -1,4 +1,4 @@
-package com.md_5.jumpwarps;
+package com.md_5.janus;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -18,10 +18,12 @@ import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.plugin.java.JavaPlugin;
 
-public class Warper extends JavaPlugin implements Listener {
+public class Main extends JavaPlugin implements Listener {
 
-    private final String identifier = "[server]";
-    private final int mat = Material.OBSIDIAN.getId();
+    private static final int FRAME = Material.OBSIDIAN.getId();
+    private static final int PORTAL = Material.PORTAL.getId();
+    private static final int SIGN = Material.WALL_SIGN.getId();
+    private static final String IDENTIFIER = "[server]";
 
     @Override
     public void onEnable() {
@@ -39,13 +41,13 @@ public class Warper extends JavaPlugin implements Listener {
     }
 
     @EventHandler
-    public void onPlayerQuit(PlayerKickEvent event) {
+    public void onPlayerKick(PlayerKickEvent event) {
         event.setLeaveMessage(null);
     }
 
     @EventHandler(ignoreCancelled = true)
     public void onSignChange(SignChangeEvent event) {
-        if (event.getLine(0).equals(identifier) && !event.getPlayer().isOp()) {
+        if (event.getLine(0).equals(IDENTIFIER) && !event.getPlayer().isOp()) {
             event.getPlayer().sendMessage(ChatColor.RED + "You are not allowed to do that!");
             event.setCancelled(true);
         }
@@ -53,27 +55,20 @@ public class Warper extends JavaPlugin implements Listener {
 
     @EventHandler(ignoreCancelled = true)
     public void onPlayerMove(PlayerMoveEvent event) {
-        Location location = event.getTo();
-        World world = location.getWorld();
-
-        if (world.getBlockAt(location).getType() == Material.PORTAL && world.getBlockAt(event.getFrom()).getType() != Material.PORTAL) {
-            Set<Block> portalBlocks = getPortalNear(world, location.getBlockX(), location.getBlockY(), location.getBlockZ());
-            Sign sign = null;
-            for (Block block : portalBlocks) {
-                Block relative;
+        Location to = event.getTo();
+        World world = to.getWorld();
+        if (world.getBlockTypeIdAt(to) == PORTAL && world.getBlockTypeIdAt(event.getFrom()) != PORTAL) {
+            for (Block block : getPortalNear(world, to.getBlockX(), to.getBlockY(), to.getBlockZ())) {
                 for (BlockFace bf : BlockFace.values()) {
-                    relative = block.getRelative(bf);
-                    if (relative.getType() == Material.WALL_SIGN) {
-                        if (((Sign) relative.getState()).getLine(0).equals(identifier)) {
-                            sign = (Sign) relative.getState();
+                    Block relative = block.getRelative(bf);
+                    if (relative.getTypeId() == SIGN) {
+                        Sign sign = (Sign) relative.getState();
+                        if (sign.getLine(0).equals(IDENTIFIER)) {
+                            event.setCancelled(true);
+                            event.getPlayer().kickPlayer("[Redirect] You aren't on the proxy: " + sign.getLine(1));
                             break;
                         }
                     }
-                }
-                if (sign != null) {
-                    event.setCancelled(true);
-                    event.getPlayer().kickPlayer("[Redirect] You aren't on the proxy: " + sign.getLine(1));
-                    break;
                 }
             }
         }
@@ -82,10 +77,10 @@ public class Warper extends JavaPlugin implements Listener {
     private Set<Block> getPortalNear(World world, int x, int y, int z) {
         byte b0 = 0;
         byte b1 = 0;
-        if (world.getBlockTypeIdAt(x - 1, y, z) == mat || world.getBlockTypeIdAt(x + 1, y, z) == mat) {
+        if (world.getBlockTypeIdAt(x - 1, y, z) == FRAME || world.getBlockTypeIdAt(x + 1, y, z) == FRAME) {
             b0 = 1;
         }
-        if (world.getBlockTypeIdAt(x, y, z - 1) == mat || world.getBlockTypeIdAt(x, y, z + 1) == mat) {
+        if (world.getBlockTypeIdAt(x, y, z - 1) == FRAME || world.getBlockTypeIdAt(x, y, z + 1) == FRAME) {
             b1 = 1;
         }
 
