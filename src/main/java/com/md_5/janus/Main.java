@@ -37,13 +37,6 @@ public class Main extends JavaPlugin implements Listener {
 
     @EventHandler
     public void onPlayerQuit(PlayerQuitEvent event) {
-        Location location = event.getPlayer().getLocation();
-        float yaw = location.getYaw();
-        if ((yaw += 180) > 360) {
-            yaw -= 360;
-        }
-        location.setYaw(yaw);
-        event.getPlayer().teleport(location);
         event.setQuitMessage(null);
     }
 
@@ -71,9 +64,18 @@ public class Main extends JavaPlugin implements Listener {
                     if (relative.getTypeId() == SIGN) {
                         Sign sign = (Sign) relative.getState();
                         if (sign.getLine(0).equals(IDENTIFIER)) {
+                            //
                             event.setCancelled(true);
+                            Location location = event.getPlayer().getLocation();
+                            float yaw = location.getYaw();
+                            if ((yaw += 180) > 360) {
+                                yaw -= 360;
+                            }
+                            location.setYaw(yaw);
+                            event.getPlayer().teleport(location);
                             event.getPlayer().kickPlayer("[Redirect] You aren't on the proxy: " + sign.getLine(1));
                             break;
+                            //
                         }
                     }
                 }
