@@ -2,6 +2,7 @@ package com.md_5.janus;
 
 import java.util.HashSet;
 import java.util.Set;
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -27,6 +28,7 @@ public class Main extends JavaPlugin implements Listener {
 
     @Override
     public void onEnable() {
+        Bukkit.getMessenger().registerOutgoingPluginChannel(this, "RubberBand");
         getServer().getPluginManager().registerEvents(this, this);
     }
 
@@ -73,7 +75,7 @@ public class Main extends JavaPlugin implements Listener {
                             }
                             location.setYaw(yaw);
                             event.getPlayer().teleport(location);
-                            event.getPlayer().kickPlayer("[Redirect] You aren't on the proxy: " + sign.getLine(1));
+                            event.getPlayer().sendPluginMessage(this, "RubberBand", sign.getLine(1).getBytes());
                             break;
                             //
                         }
