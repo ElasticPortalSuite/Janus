@@ -1,4 +1,4 @@
-package com.md_5.janus;
+package net.md_5.janus;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -14,7 +14,6 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.SignChangeEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
-import org.bukkit.event.player.PlayerKickEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -25,26 +24,29 @@ public class Main extends JavaPlugin implements Listener {
     private static final int PORTAL = Material.PORTAL.getId();
     private static final int SIGN = Material.WALL_SIGN.getId();
     private static final String IDENTIFIER = "[server]";
+    private boolean blockMessages = false;
 
     @Override
     public void onEnable() {
         Bukkit.getMessenger().registerOutgoingPluginChannel(this, "RubberBand");
         getServer().getPluginManager().registerEvents(this, this);
+        getConfig().addDefault("blockMessages", blockMessages);
+        saveConfig();
+        blockMessages = getConfig().getBoolean("blockMessages");
     }
 
     @EventHandler
     public void onPlayerJoin(PlayerJoinEvent event) {
-        event.setJoinMessage(null);
+        if (blockMessages) {
+            event.setJoinMessage(null);
+        }
     }
 
     @EventHandler
     public void onPlayerQuit(PlayerQuitEvent event) {
-        event.setQuitMessage(null);
-    }
-
-    @EventHandler
-    public void onPlayerKick(PlayerKickEvent event) {
-        event.setLeaveMessage(null);
+        if (blockMessages) {
+            event.setQuitMessage(null);
+        }
     }
 
     @EventHandler(ignoreCancelled = true)
