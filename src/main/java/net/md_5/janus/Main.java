@@ -31,6 +31,7 @@ public class Main extends JavaPlugin implements Listener {
         Bukkit.getMessenger().registerOutgoingPluginChannel(this, "RubberBand");
         getServer().getPluginManager().registerEvents(this, this);
         getConfig().addDefault("blockMessages", blockMessages);
+        getConfig().options().copyDefaults(true);
         saveConfig();
         blockMessages = getConfig().getBoolean("blockMessages");
     }
