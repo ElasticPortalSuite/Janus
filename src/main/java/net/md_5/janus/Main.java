@@ -1,5 +1,8 @@
 package net.md_5.janus;
 
+import java.io.ByteArrayOutputStream;
+import java.io.DataOutputStream;
+import java.io.IOException;
 import java.util.HashSet;
 import java.util.Set;
 import org.bukkit.Bukkit;
@@ -28,7 +31,7 @@ public class Main extends JavaPlugin implements Listener {
 
     @Override
     public void onEnable() {
-        Bukkit.getMessenger().registerOutgoingPluginChannel(this, "RubberBand");
+        Bukkit.getMessenger().registerOutgoingPluginChannel(this, "BungeeCord::Connect");
         getServer().getPluginManager().registerEvents(this, this);
         getConfig().addDefault("blockMessages", blockMessages);
         getConfig().options().copyDefaults(true);
@@ -78,7 +81,15 @@ public class Main extends JavaPlugin implements Listener {
                             }
                             location.setYaw(yaw);
                             event.getPlayer().teleport(location);
-                            event.getPlayer().sendPluginMessage(this, "RubberBand", sign.getLine(1).getBytes());
+                            ByteArrayOutputStream b = new ByteArrayOutputStream();
+                            DataOutputStream out = new DataOutputStream(b);
+                            try {
+                                out.writeUTF(sign.getLine(1));
+                            } catch (IOException ex) {
+                                // Impossible
+                            }
+
+                            event.getPlayer().sendPluginMessage(this, "BungeeCord::Connect", b.toByteArray());
                             break;
                             //
                         }
