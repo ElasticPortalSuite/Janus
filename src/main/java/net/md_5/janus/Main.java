@@ -31,7 +31,7 @@ public class Main extends JavaPlugin implements Listener {
 
     @Override
     public void onEnable() {
-        Bukkit.getMessenger().registerOutgoingPluginChannel(this, "BungeeCord::Connect");
+        Bukkit.getMessenger().registerOutgoingPluginChannel(this, "BungeeCord");
         getServer().getPluginManager().registerEvents(this, this);
         getConfig().addDefault("blockMessages", blockMessages);
         getConfig().options().copyDefaults(true);
@@ -84,12 +84,13 @@ public class Main extends JavaPlugin implements Listener {
                             ByteArrayOutputStream b = new ByteArrayOutputStream();
                             DataOutputStream out = new DataOutputStream(b);
                             try {
+                                out.writeUTF("Connect");
                                 out.writeUTF(sign.getLine(1));
                             } catch (IOException ex) {
                                 // Impossible
                             }
 
-                            event.getPlayer().sendPluginMessage(this, "BungeeCord::Connect", b.toByteArray());
+                            event.getPlayer().sendPluginMessage(this, "BungeeCord", b.toByteArray());
                             break;
                             //
                         }
