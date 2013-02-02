@@ -10,12 +10,12 @@
 
     <name>Janus</name>
     <description>The plugin portion of the Elastic Teleport Suite.</description>
-    <url>https://github.com/Shadowraze/Janus</url>
+    <url>https://github.com/EcoCityCraft/Janus</url>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <build.number>Unknown</build.number>
-        <main.class>net.md_5.janus.Main</main.class>
+        <main.class>net.md_5.janus.Janus</main.class>
     </properties>
 
     <dependencies>

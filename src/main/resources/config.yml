@@ -1,0 +1,3 @@
+block-messages: false ## This defines whether join/quit messages are blocked
+frame-ids: [49] ## This defines what blocks can be used as frames for portals
+safety-limit: 50 ## This defines the maximum blocks that can be used in a frame to avoid inadvertently making too large of portals

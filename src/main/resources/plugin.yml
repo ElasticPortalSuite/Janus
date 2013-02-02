@@ -1,7 +1,11 @@
 name: ${project.name}
 version: ${build.number}
 description: ${project.description}
-author: md_5
+author: ['md_5', 'ammar2']
 website: ${project.url}
 
 main: ${main.class}
+
+commands:
+  janus:
+    usage: /janus
