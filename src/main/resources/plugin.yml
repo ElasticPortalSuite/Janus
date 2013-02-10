@@ -1,7 +1,7 @@
 name: ${project.name}
 version: ${build.number}
 description: ${project.description}
-author: ['md_5', 'ammar2']
+authors: ['md_5', 'ammar2']
 website: ${project.url}
 
 main: ${main.class}
@@ -9,3 +9,15 @@ main: ${main.class}
 commands:
   janus:
     usage: /janus
+    permission: janus.command
+permissions:
+  janus.command:
+    description: "Allows user to use the /janus command"
+  janus.command.create:
+    description: "Allows user to use the /janus create, /janus cancel and /janus confirm commands (for portal creation)"
+  janus.command.reload:
+    description: "Allows user to use the /janus reload command"
+  janus.portal.use:
+    default: true
+    description: "Allows user to use janus portals"
+

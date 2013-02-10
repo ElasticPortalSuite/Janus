@@ -148,6 +148,10 @@ public class Janus extends JavaPlugin implements Listener {
         if (args.length >= 1) {
 
             if (args[0].equalsIgnoreCase("create")) {
+                if (!sender.hasPermission("janus.command.create")) {
+                    sender.sendMessage(ChatColor.RED + "You do not have the permissions to create portals");
+                    return true;
+                }
                 if (args.length < 2 || args.length > 2) {
                     sender.sendMessage(ChatColor.RED + "Usage: /janus create <server>");
                     return true;
@@ -165,6 +169,11 @@ public class Janus extends JavaPlugin implements Listener {
 
             if (args[0].equalsIgnoreCase("confirm")) {
                 Player player = (Player) sender;
+
+                if (!this.pendingConfirmation.containsKey(player)) {
+                    sender.sendMessage(ChatColor.RED + "Please select a frame first");
+                    return true;
+                }
 
                 PendingFrame pendingFrame = this.pendingConfirmation.get(player);
 
@@ -212,10 +221,15 @@ public class Janus extends JavaPlugin implements Listener {
             }
 
             if (args[0].equalsIgnoreCase("reload")) {
+                if (!sender.hasPermission("janus.command.reload")) {
+                    sender.sendMessage(ChatColor.RED + "You do not have the permissions to reload janus");
+                    return true;
+                }
                 try {
                     this.loadConfig();
                 } catch (Exception e) {
-                    sender.sendMessage(ChatColor.RED + "An exception occured, please check server log");
+                    e.printStackTrace();
+                    sender.sendMessage(ChatColor.RED + "An exception occurred, please check server log");
                 }
             }
 
@@ -246,7 +260,8 @@ public class Janus extends JavaPlugin implements Listener {
             PlaneAlignment alignment;
 
             // Attempt to resolve plane alignment, i.e are we dealing with a west <-> east portal or north <-> south portal
-            alignment: {
+            alignment:
+            {
                 if (clickedBlock.getRelative(BlockFace.UP).getType() == frameMaterial) {
                     // Oh cool, there's stuff above, lets get the top most block of the portal then
                     Block upperMost = clickedBlock;
@@ -430,6 +445,9 @@ public class Janus extends JavaPlugin implements Listener {
         String world = event.getTo().getWorld().getName();
         BlockPosition to = BlockPosition.fromLocation(event.getTo());
         if (fastLookupMap.containsKey(world)) {
+            if (!event.getPlayer().hasPermission("janus.portal.use")) {
+                return;
+            }
             Map<BlockPosition, Integer> map = fastLookupMap.get(world);
             Integer id;
             if ((id = map.get(to)) != null) {
@@ -443,7 +461,6 @@ public class Janus extends JavaPlugin implements Listener {
                     // Impossible
                 }
 
-                event.getPlayer().sendMessage("lol going to " + targetServer);
                 event.getPlayer().sendPluginMessage(this, "BungeeCord", b.toByteArray());
             }
         }

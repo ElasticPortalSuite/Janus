@@ -128,7 +128,7 @@ public class FrameUtil {
 
     static boolean surroundedBy(Block block, Material check, int limit, BlockFace face) {
         int count = 0;
-        while(true) {
+        while (true) {
             if (count > limit) {
                 return false;
             }
