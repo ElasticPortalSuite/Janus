@@ -1,8 +1,10 @@
 package net.md_5.janus.util;
 
 import org.bukkit.Location;
+import org.bukkit.World;
 import org.bukkit.block.Block;
 
+import java.util.ArrayList;
 import java.util.Collection;
 
 public class BlockPosition {
@@ -61,10 +63,22 @@ public class BlockPosition {
         return (x ^ y ^ z) % 3;
     }
 
+    public Location toLocation(World world) {
+        return new Location(world, x, y, z);
+    }
+
     public static void addAllFromLocation(Collection<BlockPosition> positions, Collection<Block> blocks) {
         for (Block block : blocks) {
             positions.add(fromLocation(block.getLocation()));
         }
+    }
+
+    public static Collection<Block> toBlockCollection(Collection<BlockPosition> positions, World world) {
+        Collection<Block> locations = new ArrayList<Block>();
+        for (BlockPosition blockPosition : positions) {
+            locations.add(world.getBlockAt(blockPosition.getX(), blockPosition.getY(), blockPosition.getZ()));
+        }
+        return locations;
     }
 
     @Override

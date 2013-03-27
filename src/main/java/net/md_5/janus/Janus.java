@@ -47,6 +47,7 @@ public class Janus extends JavaPlugin implements Listener {
     private Set<Integer> frameIds;
     private Map<String, String> pendingPortalCreation = new HashMap<String, String>(); // maps player name -> server for portal creation
     private Map<Player, PendingFrame> pendingConfirmation = new WeakHashMap<Player, PendingFrame>(); // map players -> frame blocks
+    private Map<Player, Portal> pendingDeletion = new WeakHashMap<Player, Portal>(); // maps player -> frame to delete
 
     private Map<Integer, Portal> portalIDMap = new HashMap<Integer, Portal>();
     /**
@@ -117,7 +118,7 @@ public class Janus extends JavaPlugin implements Listener {
                 List<Block> portalBlocks = PendingFrame.locationListToBlockList(
                         integersToLocations(subsection.getIntegerList("portal-blocks"), world));
 
-                Portal portal = new Portal(targetServer, worldName, frameBlocks, portalBlocks);
+                Portal portal = new Portal(targetServer, worldName, frameBlocks, portalBlocks, value);
                 this.portalIDMap.put(value, portal);
 
                 if (fastLookupMap.containsKey(worldName)) {
@@ -145,6 +146,7 @@ public class Janus extends JavaPlugin implements Listener {
             sender.sendMessage(ChatColor.RED + "Only players may alter portals");
             return true;
         }
+        Player player = (Player) sender;
         if (args.length >= 1) {
 
             if (args[0].equalsIgnoreCase("create")) {
@@ -163,13 +165,17 @@ public class Janus extends JavaPlugin implements Listener {
             }
 
             if (args[0].equalsIgnoreCase("cancel")) {
-                this.pendingPortalCreation.remove(sender.getName());
-                sender.sendMessage(ChatColor.GREEN + "You are no longer in portal creation mode");
+                if (this.pendingPortalCreation.containsKey(sender.getName())) {
+                    this.pendingPortalCreation.remove(sender.getName());
+                    sender.sendMessage(ChatColor.GREEN + "You are no longer in portal creation mode");
+                }
+                if (this.pendingDeletion.containsKey(player)) {
+                    this.pendingDeletion.remove(player);
+                    sender.sendMessage(ChatColor.GREEN + "You are no longer in portal deletion mode");
+                }
             }
 
             if (args[0].equalsIgnoreCase("confirm")) {
-                Player player = (Player) sender;
-
                 if (!this.pendingConfirmation.containsKey(player)) {
                     sender.sendMessage(ChatColor.RED + "Please select a frame first");
                     return true;
@@ -185,6 +191,7 @@ public class Janus extends JavaPlugin implements Listener {
                 if (!portalConfig.isConfigurationSection("portals")) {
                     portalConfig.createSection("portals");
                 }
+                int id = lastId + 1;
                 ConfigurationSection section = portalConfig.getConfigurationSection("portals").createSection(String.valueOf(++lastId));
                 String world = player.getLocation().getWorld().getName();
 
@@ -201,7 +208,7 @@ public class Janus extends JavaPlugin implements Listener {
                     return true;
                 }
 
-                Portal portal = new Portal(pendingFrame.getServer(), world, frameBlocks, portalBlocks);
+                Portal portal = new Portal(pendingFrame.getServer(), world, frameBlocks, portalBlocks, id);
                 this.portalIDMap.put(lastId, portal);
 
                 if (fastLookupMap.containsKey(world)) {
@@ -233,6 +240,39 @@ public class Janus extends JavaPlugin implements Listener {
                 }
             }
 
+            if (args[0].equalsIgnoreCase("remove")) {
+                if (!sender.hasPermission("janus.command.remove")) {
+                    sender.sendMessage(ChatColor.RED + "You do not have the permissions to remove janus portals");
+                    return true;
+                }
+                if (pendingDeletion.containsKey(sender)) {
+                    Portal portal = pendingDeletion.get(sender);
+                    if (portal == null) {
+                        sender.sendMessage(ChatColor.RED + "Please click the portal's frame you want to delete");
+                        return true;
+                    } else {
+                        this.pendingDeletion.remove(player);
+                        Map<BlockPosition, Integer> map = fastLookupMap.get(portal.getWorld());
+                        for (BlockPosition block : portal.getPortalBlocks()) {
+                            map.remove(block);
+                        }
+                        this.portalIDMap.remove(portal.getId());
+                        this.portalConfig.set("portals." + portal.getId(), null);
+                        try {
+                            portalConfig.save(new File(getDataFolder(), "portals.yml"));
+                        } catch (IOException e) {
+                            sender.sendMessage(ChatColor.RED + "An error occurred while trying to delete this portal, check server log");
+                            e.printStackTrace();
+                            return true;
+                        }
+                        sender.sendMessage(ChatColor.AQUA + "Portal successfully removed");
+                    }
+                } else {
+                    sender.sendMessage(ChatColor.AQUA + "Please click the portal's frame you want to delete");
+                    this.pendingDeletion.put(player, null);
+                }
+            }
+
         } else {
             sender.sendMessage(ChatColor.RED + "Usage: ");
             sender.sendMessage(ChatColor.RED + "/janus create <server>");
@@ -245,6 +285,30 @@ public class Janus extends JavaPlugin implements Listener {
     @EventHandler
     public void onPlayerInteract(PlayerInteractEvent event) {
         if (event.getAction() == Action.LEFT_CLICK_BLOCK || event.getAction() == Action.RIGHT_CLICK_BLOCK) {
+            if (this.pendingDeletion.containsKey(event.getPlayer())) {
+                Player player = event.getPlayer();
+                if (fastLookupMap.containsKey(player.getWorld().getName())) {
+                    BlockPosition position = BlockPosition.fromLocation(event.getClickedBlock().getLocation());
+                    Portal portal = null;
+                    for (Portal port : portalIDMap.values()) {
+                        if (port.getFrameBlocks().contains(position)) {
+                            portal = port;
+                            break;
+                        }
+                    }
+                    if (portal == null) {
+                        player.sendMessage(ChatColor.RED + "Please click a valid portal frame");
+                    } else {
+                        this.pendingDeletion.put(player, portal);
+                        new FrameConfirmationTask(player, BlockPosition.toBlockCollection(portal.getFrameBlocks(), player.getLocation().getWorld()),
+                                event.getClickedBlock().getType(), event.getClickedBlock().getData()).runTaskTimer(this, 5, 5);
+                        player.sendMessage(ChatColor.AQUA + "The selected portal will now flash, use '/janus remove' again to confirm deletion");
+                    }
+                } else {
+                    player.sendMessage(ChatColor.RED + "Please click a valid portal frame");
+                }
+
+            }
             if (!this.pendingPortalCreation.containsKey(event.getPlayer().getName())) {
                 return;
             }

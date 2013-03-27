@@ -12,8 +12,10 @@ public class Portal {
     private Set<BlockPosition> portalBlocks;
     private String targetServer;
     private String world;
+    private int id;
 
-    public Portal(String targetServer, String world, Collection<Block> frame, Collection<Block> portal) {
+    public Portal(String targetServer, String world, Collection<Block> frame, Collection<Block> portal, int id) {
+        this.id = id;
         this.frameBlocks = new HashSet<BlockPosition>(frame.size());
         this.portalBlocks = new HashSet<BlockPosition>(portal.size());
 
@@ -40,6 +42,10 @@ public class Portal {
         return world;
     }
 
+    public int getId() {
+        return id;
+    }
+
     @Override
     public String toString() {
         final StringBuilder sb = new StringBuilder();
@@ -51,4 +57,5 @@ public class Portal {
         sb.append('}');
         return sb.toString();
     }
+
 }
